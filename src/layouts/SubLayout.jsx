@@ -3,7 +3,6 @@ import { HouseIcon } from "@phosphor-icons/react";
 import { Helmet } from "react-helmet-async";
 import Footer from "./Footer";
 
-/* ================= MENU DATA (통합 관리) ================= */
 const MENU_DATA = {
   about: {
     title: "COMPANY",
@@ -34,9 +33,7 @@ const MENU_DATA = {
     desc: "금융 시장의 성공 파트너, \n 차트연구소의 다양한 프로젝트와 파트너사를 확인하세요",
     seoTitle: "포트폴리오 | 차트연구소",
     keywords: "프로젝트, 고객사, 파트너",
-    sub: [
-      { name: "프로젝트 사례", path: "/portfolio/project" },
-    ],
+    sub: [{ name: "프로젝트 사례", path: "/portfolio/project" }],
   },
   notice: {
     title: "NOTICE",
@@ -44,7 +41,7 @@ const MENU_DATA = {
     desc: "차트연구소의 새로운 소식과 \n 주요 업데이트 내용을 확인하실 수 있습니다",
     seoTitle: "공지사항 | 차트연구소",
     keywords: "공지사항, 뉴스, 업데이트",
-    sub: [], // 하위 메뉴 없음
+    sub: [],
   },
   contact: {
     title: "CONTACT",
@@ -52,30 +49,41 @@ const MENU_DATA = {
     desc: "금융 솔루션 도입 및 파트너십 문의 등 \n 궁금하신 점을 남겨주시면 정성껏 답변해 드립니다",
     seoTitle: "상담문의 | 차트연구소",
     keywords: "상담문의, 고객센터, 제휴문의",
-    sub: [], // 하위 메뉴 없음
-  }
+    sub: [],
+  },
 };
 
 function SubLayout() {
   const { pathname } = useLocation();
-  const paths = pathname.split("/").filter(Boolean); 
+  const paths = pathname.split("/").filter(Boolean);
   const depth1 = paths[0];
 
-  /* ================= 데이터 추출 ================= */
   const currentCategory = MENU_DATA[depth1];
   const tabs = currentCategory?.sub || [];
-  
-  // Breadcrumb 생성
-  const breadcrumbs = paths.map((p, i) => {
-    let name = p;
-    if (i === 0) name = currentCategory?.breadcrumb || p;
-    if (i === 1) name = currentCategory?.sub.find(s => s.path.includes(p))?.name || p;
-    
-    return {
-      name,
-      path: "/" + paths.slice(0, i + 1).join("/"),
-    };
-  });
+
+  const breadcrumbs =
+    depth1 === "notice"
+      ? [
+          {
+            name: currentCategory?.breadcrumb,
+            path: "/notice",
+          },
+        ]
+      : paths.map((p, i) => {
+          let name = p;
+
+          if (i === 0) name = currentCategory?.breadcrumb || p;
+
+          if (i === 1) {
+            name =
+              currentCategory?.sub.find((s) => s.path.includes(p))?.name || p;
+          }
+
+          return {
+            name,
+            path: "/" + paths.slice(0, i + 1).join("/"),
+          };
+        });
 
   if (!currentCategory) return <Outlet />;
 
@@ -85,21 +93,34 @@ function SubLayout() {
         <div className={`sub-wrapper sub-wrapper--${depth1}`}>
           <Helmet>
             <title>{currentCategory.seoTitle}</title>
-            <meta name="description" content={currentCategory.desc.replace(/\n/g, " ")} />
+            <meta
+              name="description"
+              content={currentCategory.desc.replace(/\n/g, " ")}
+            />
             <meta name="keywords" content={currentCategory.keywords} />
           </Helmet>
 
-          {/* 서브 히어로 영역 */}
           <section className={`sub-hero sub-hero--${depth1}`}>
             <div className="sub-hero__inner inner">
               <div className="sub-hero__content">
-                <h2 className="sub-hero__title">{currentCategory.title}</h2>
-                <p className="sub-hero__desc" style={{ whiteSpace: "pre-line" }}>{currentCategory.desc}</p>
+                <h2 className="sub-hero__title">
+                  {currentCategory.title}
+                </h2>
+                <p
+                  className="sub-hero__desc"
+                  style={{ whiteSpace: "pre-line" }}
+                >
+                  {currentCategory.desc}
+                </p>
               </div>
 
               <ul className="sub-hero__breadcrumb">
                 <li className="sub-hero__home-icon">
-                  <Link to="/"><i><HouseIcon size={18} weight="fill" /></i></Link>
+                  <Link to="/">
+                    <i>
+                      <HouseIcon size={18} weight="fill" />
+                    </i>
+                  </Link>
                 </li>
                 {breadcrumbs.map((bc) => (
                   <li key={bc.path} className="sub-hero__bc-item">
@@ -110,14 +131,20 @@ function SubLayout() {
             </div>
           </section>
 
-          {/* 서브 탭 메뉴 (하위 메뉴가 있을 때만 노출) */}
           {tabs.length > 0 && (
             <nav className="sub-tab">
               <div className="sub-tab__inner inner">
                 <ul className="sub-tab__list">
                   {tabs.map((tab) => (
-                    <li key={tab.path} className={`sub-tab__item ${pathname === tab.path ? "is-active" : ""}`}>
-                      <Link to={tab.path} className="sub-tab__link">{tab.name}</Link>
+                    <li
+                      key={tab.path}
+                      className={`sub-tab__item ${
+                        pathname === tab.path ? "is-active" : ""
+                      }`}
+                    >
+                      <Link to={tab.path} className="sub-tab__link">
+                        {tab.name}
+                      </Link>
                     </li>
                   ))}
                 </ul>

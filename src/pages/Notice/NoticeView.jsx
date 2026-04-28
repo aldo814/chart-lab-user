@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { client } from "../../api/sanity";
-import { PortableText } from "@portabletext/react";
 import SectionTitle from "../../components/SectionTitle";
 import icoDown from "../../assets/images/sub/ico_down.svg";
 import icoNavPrev from "../../assets/images/sub/ico_nav_prev.svg";
 import icoNavNext from "../../assets/images/sub/ico_nav_next.svg";
+import Loading from "../../components/Loading";
 
 function NoticeView() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
 
   const [post, setPost] = useState(null);
@@ -18,20 +18,20 @@ function NoticeView() {
   useEffect(() => {
     client
       .fetch(
-        `*[_type == "notice" && _id == $id][0] {
+        `*[_type == "notice" && slug.current == $slug][0]{
           _id,
           title,
           createdAt,
           isPinned,
           content,
           "authorName": author->name,
-          "files": attachments[] {
-            "url": asset->url,
-            "originalFilename": asset->originalFilename,
-            "size": asset->size
+          "files": attachment[].asset->{
+            url,
+            originalFilename,
+            size
           }
         }`,
-        { id }
+        { slug }
       )
       .then(async (current) => {
         setPost(current);
@@ -40,19 +40,19 @@ function NoticeView() {
 
         const prev = await client.fetch(
           `*[_type == "notice" && createdAt < $createdAt && !isPinned]
-          | order(createdAt desc)[0] { _id, title }`,
+           | order(createdAt desc)[0] { _id, title, "slug": slug.current }`,
           { createdAt: current.createdAt }
         );
         setPrevPost(prev);
 
         const next = await client.fetch(
           `*[_type == "notice" && createdAt > $createdAt && !isPinned]
-          | order(createdAt asc)[0] { _id, title }`,
+           | order(createdAt asc)[0] { _id, title, "slug": slug.current }`,
           { createdAt: current.createdAt }
         );
         setNextPost(next);
       });
-  }, [id]);
+  }, [slug]);
 
   const truncateFilename = (filename, maxLength = 10) => {
     if (!filename) return "";
@@ -66,7 +66,7 @@ function NoticeView() {
   if (!post) {
     return (
       <div className="notice-view">
-        <div className="notice-view__loading">로딩 중...</div>
+        <Loading />
       </div>
     );
   }
@@ -76,7 +76,6 @@ function NoticeView() {
       <div className="inner">
         <SectionTitle variant="only" title="공지사항" />
 
-        {/* 헤드 */}
         <div className="notice-view__head">
           <h3 className="notice-view__title">{post.title}</h3>
           <div className="notice-view__meta">
@@ -95,17 +94,17 @@ function NoticeView() {
           </div>
         </div>
 
-        {/* 본문 */}
         <div className="notice-view__desc">
           {post.content ? (
-            <PortableText value={post.content} />
+            post.content.split("\n").map((line, i) => (
+              <p key={i}>{line}</p>
+            ))
           ) : (
             <p>내용이 없습니다.</p>
           )}
         </div>
 
-        {/* 첨부파일 */}
-        {post.files && post.files.length > 0 && (
+        {Array.isArray(post.files) && post.files.length > 0 && (
           <div className="notice-view__attach">
             <p className="notice-view__attach-title">첨부파일</p>
             <ul className="notice-view__attach-list">
@@ -132,13 +131,10 @@ function NoticeView() {
           </div>
         )}
 
-        {/* 이전글 / 다음글 */}
         <div className="notice-view__nav">
-
-          {/* 이전글 */}
           <div className={`notice-view__nav-item notice-view__nav-item--prev${!prevPost ? " notice-view__nav-item--disabled" : ""}`}>
             {prevPost ? (
-              <Link to={`/notice/${prevPost._id}`} className="notice-view__nav-link">
+              <Link to={`/notice/${prevPost.slug}`} className="notice-view__nav-link">
                 <span className="notice-view__nav-ico">
                   <img src={icoNavPrev} alt="" />
                 </span>
@@ -160,10 +156,9 @@ function NoticeView() {
             )}
           </div>
 
-          {/* 다음글 */}
           <div className={`notice-view__nav-item notice-view__nav-item--next${!nextPost ? " notice-view__nav-item--disabled" : ""}`}>
             {nextPost ? (
-              <Link to={`/notice/${nextPost._id}`} className="notice-view__nav-link">
+              <Link to={`/notice/${nextPost.slug}`} className="notice-view__nav-link">
                 <span className="notice-view__nav-ico">
                   <img src={icoNavNext} alt="" />
                 </span>
@@ -184,10 +179,8 @@ function NoticeView() {
               </div>
             )}
           </div>
-
         </div>
 
-        {/* 목록 버튼 */}
         <div className="notice-view__actions">
           <button
             className="notice-view__btn notice-view__btn--list"
