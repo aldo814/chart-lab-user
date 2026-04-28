@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const Button = ({ children, variant = 'arrow-white', to, onClick, onMouseEnter, onMouseLeave }) => {
+const Button = ({ children, variant = 'arrow-white', to, onClick, onMouseEnter, onMouseLeave ,className = "" }) => {
   const classMap = {
     'arrow-white': 'arrow-btn arrow-btn--white',
     'arrow-blue': 'arrow-btn arrow-btn--blue',

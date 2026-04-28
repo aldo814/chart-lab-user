@@ -21,6 +21,7 @@ import Partner from "../pages/Portfolio/Partner";
 
 // Etc
 import Notice from "../pages/Notice/NoticeList";
+import NoticeView from "../pages/Notice/NoticeView";
 import Contact from "../pages/Contact/Contact";
 
 const router = createBrowserRouter([
@@ -69,7 +70,10 @@ const router = createBrowserRouter([
       {
         path: "notice",
         element: <SubLayout />,
-        children: [{ index: true, element: <Notice /> }],
+        children: [
+          { index: true, element: <Notice /> },
+          { path: ":id", element: <NoticeView /> },
+        ],
       },
       {
         path: "contact",

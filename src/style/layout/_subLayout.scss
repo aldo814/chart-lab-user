@@ -185,8 +185,9 @@
 
   &--sub {
     .section-title__en {
-      font-size: 3rem;
+      font-size: 2.5rem;
       color: #777;
+      text-transform: uppercase;
       opacity: 0.7;
       margin-bottom: 1rem;
 
@@ -198,6 +199,30 @@
     .section-title__title {
       font-size: 1.75rem;
     }
+  }
+  &--center {
+    text-align: center;
+    position: relative;
+    &::after{
+      content: '';
+      display: block;
+      width: 1px;
+      height: 60px;
+      background: #000;
+      margin: 2.5rem auto 5.625rem auto;
+    }
+    .section-title__center-top{
+      font-size: 1.125rem;
+      letter-spacing: -0.0313rem;
+      color: $primary;
+      font-weight: 500;
+    }
+    h2{
+      font-size: 3rem;
+    }
+  }
+  &--only{
+    text-align: center;
   }
 }
 

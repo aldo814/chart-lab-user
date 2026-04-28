@@ -36,7 +36,6 @@ const MENU_DATA = {
     keywords: "프로젝트, 고객사, 파트너",
     sub: [
       { name: "프로젝트 사례", path: "/portfolio/project" },
-      { name: "파트너 / 고객사", path: "/portfolio/partner" },
     ],
   },
   notice: {
