@@ -1,3 +1,4 @@
+// NoticeView.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { client } from "../../api/sanity";
@@ -5,6 +6,59 @@ import SectionTitle from "../../components/SectionTitle";
 import icoDown from "../../assets/images/sub/ico_down.svg";
 import icoNavPrev from "../../assets/images/sub/ico_nav_prev.svg";
 import icoNavNext from "../../assets/images/sub/ico_nav_next.svg";
+import { PortableText } from "@portabletext/react";
+import imageUrlBuilder from "@sanity/image-url";
+
+const builder = imageUrlBuilder(client);
+const urlFor = (source) => builder.image(source);
+
+const portableTextComponents = {
+  types: {
+    image: ({ value }) => {
+      if (!value?.asset?._ref) return null;
+      return (
+        <figure className="notice-view__content-image">
+          <img
+            src={urlFor(value).fit("max").auto("format").url()}
+            alt={value.alt || ""}
+          />
+          {value.caption && (
+            <figcaption className="notice-view__content-caption">
+              {value.caption}
+            </figcaption>
+          )}
+        </figure>
+      );
+    },
+  },
+  marks: {
+    link: ({ children, value }) => (
+      <a href={value?.href} target="_blank" rel="noopener noreferrer">
+        {children}
+      </a>
+    ),
+    strong: ({ children }) => <strong>{children}</strong>,
+    em: ({ children }) => <em>{children}</em>,
+    underline: ({ children }) => <u>{children}</u>,
+    "strike-through": ({ children }) => <s>{children}</s>,
+  },
+  block: {
+    normal: ({ children }) => <p>{children}</p>,
+    h1: ({ children }) => <h1>{children}</h1>,
+    h2: ({ children }) => <h2>{children}</h2>,
+    h3: ({ children }) => <h3>{children}</h3>,
+    h4: ({ children }) => <h4>{children}</h4>,
+    blockquote: ({ children }) => <blockquote>{children}</blockquote>,
+  },
+  list: {
+    bullet: ({ children }) => <ul>{children}</ul>,
+    number: ({ children }) => <ol>{children}</ol>,
+  },
+  listItem: {
+    bullet: ({ children }) => <li>{children}</li>,
+    number: ({ children }) => <li>{children}</li>,
+  },
+};
 
 function NoticeView() {
   const { slug } = useParams();
@@ -13,8 +67,11 @@ function NoticeView() {
   const [post, setPost] = useState(null);
   const [prevPost, setPrevPost] = useState(null);
   const [nextPost, setNextPost] = useState(null);
+  const [loadingNav, setLoadingNav] = useState(true);
 
   useEffect(() => {
+    setLoadingNav(true);
+
     client
       .fetch(
         `*[_type == "notice" && slug.current == $slug][0]{
@@ -22,7 +79,13 @@ function NoticeView() {
           title,
           createdAt,
           isPinned,
-          content,
+          content[]{
+            ...,
+            _type == "image" => {
+              ...,
+              asset->
+            }
+          },
           "authorName": author->name,
           "files": attachment[].asset->{
             url,
@@ -35,21 +98,26 @@ function NoticeView() {
       .then(async (current) => {
         setPost(current);
 
-        if (!current?.createdAt) return;
+        if (!current?.createdAt) {
+          setLoadingNav(false);
+          return;
+        }
 
         const prev = await client.fetch(
           `*[_type == "notice" && createdAt < $createdAt && !isPinned]
            | order(createdAt desc)[0] { _id, title, "slug": slug.current }`,
           { createdAt: current.createdAt }
         );
-        setPrevPost(prev);
 
         const next = await client.fetch(
           `*[_type == "notice" && createdAt > $createdAt && !isPinned]
            | order(createdAt asc)[0] { _id, title, "slug": slug.current }`,
           { createdAt: current.createdAt }
         );
+
+        setPrevPost(prev);
         setNextPost(next);
+        setLoadingNav(false);
       });
   }, [slug]);
 
@@ -69,31 +137,31 @@ function NoticeView() {
           <div className="notice-view__head">
             <div
               className="skeleton-box"
-              style={{ height: "28px", width: "60%", marginBottom: "16px" }}
+              style={{ height: 28, width: "60%", marginBottom: 16 }}
             />
             <div className="notice-view__meta">
               <div
                 className="skeleton-box"
-                style={{ height: "16px", width: "100px" }}
+                style={{ height: 16, width: 100 }}
               />
               <div
                 className="skeleton-box"
-                style={{ height: "16px", width: "100px" }}
+                style={{ height: 16, width: 100 }}
               />
             </div>
           </div>
           <div className="notice-view__desc">
             <div
               className="skeleton-box"
-              style={{ height: "16px", width: "100%", marginBottom: "8px" }}
+              style={{ height: 16, width: "100%", marginBottom: 8 }}
             />
             <div
               className="skeleton-box"
-              style={{ height: "16px", width: "90%", marginBottom: "8px" }}
+              style={{ height: 16, width: "90%", marginBottom: 8 }}
             />
             <div
               className="skeleton-box"
-              style={{ height: "16px", width: "80%" }}
+              style={{ height: 16, width: "80%" }}
             />
           </div>
         </div>
@@ -126,7 +194,10 @@ function NoticeView() {
 
         <div className="notice-view__desc">
           {post.content ? (
-            post.content.split("\n").map((line, i) => <p key={i}>{line}</p>)
+            <PortableText
+              value={post.content}
+              components={portableTextComponents}
+            />
           ) : (
             <p>내용이 없습니다.</p>
           )}
@@ -144,7 +215,6 @@ function NoticeView() {
                     download={file.originalFilename}
                     target="_blank"
                     rel="noreferrer"
-                    title={file.originalFilename}
                   >
                     <span className="notice-view__attach-name">
                       {truncateFilename(file.originalFilename)}
@@ -160,10 +230,22 @@ function NoticeView() {
         )}
 
         <div className="notice-view__nav">
-          <div
-            className={`notice-view__nav-item notice-view__nav-item--prev${!prevPost ? " notice-view__nav-item--disabled" : ""}`}
-          >
-            {prevPost ? (
+          <div className="notice-view__nav-item notice-view__nav-item--prev">
+            {loadingNav ? (
+              <div className="notice-view__nav-link--skeleton">
+                <div className="skeleton-box notice-view__nav-ico--skeleton" />
+                <div className="notice-view__nav-text--skeleton">
+                  <div
+                    className="skeleton-box"
+                    style={{ width: 60, height: 14 }}
+                  />
+                  <div
+                    className="skeleton-box"
+                    style={{ width: 160, height: 14 }}
+                  />
+                </div>
+              </div>
+            ) : prevPost ? (
               <Link
                 to={`/notice/${prevPost.slug}`}
                 className="notice-view__nav-link"
@@ -193,10 +275,25 @@ function NoticeView() {
             )}
           </div>
 
-          <div
-            className={`notice-view__nav-item notice-view__nav-item--next${!nextPost ? " notice-view__nav-item--disabled" : ""}`}
-          >
-            {nextPost ? (
+          <div className="notice-view__nav-item notice-view__nav-item--next">
+            {loadingNav ? (
+              <div className="notice-view__nav-link">
+                <div
+                  className="skeleton-box"
+                  style={{ width: 24, height: 24 }}
+                />
+                <div>
+                  <div
+                    className="skeleton-box"
+                    style={{ width: 60, height: 14, marginBottom: 6 }}
+                  />
+                  <div
+                    className="skeleton-box"
+                    style={{ width: 160, height: 14 }}
+                  />
+                </div>
+              </div>
+            ) : nextPost ? (
               <Link
                 to={`/notice/${nextPost.slug}`}
                 className="notice-view__nav-link"
@@ -230,13 +327,7 @@ function NoticeView() {
         <div className="notice-view__actions">
           <button
             className="notice-view__btn notice-view__btn--list"
-            onClick={() => {
-              if (window.history.length > 1) {
-                navigate(-1);
-              } else {
-                navigate("/notice");
-              }
-            }}
+            onClick={() => navigate("/notice")}
           >
             목록
           </button>

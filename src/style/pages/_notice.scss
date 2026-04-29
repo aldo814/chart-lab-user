@@ -1,13 +1,11 @@
 @use '../base/variables'as *;
 
-  /* 페이지별 서브 hero bg */
-  .sub-hero--notice {
-    background: url(../../assets/images/sub/bg_notice.png) no-repeat center;
-    background-size: cover;
-  }
+.sub-hero--notice {
+  background: url(../../assets/images/sub/bg_notice.png) no-repeat center;
+  background-size: cover;
+}
 
 .notice{
-  /* 검색영역 */
   &__search{
     background: #f8f8f8;
     padding: 2.5rem;
@@ -47,7 +45,6 @@
     font-size: 1rem;
     letter-spacing: -0.0313rem;
   }
-  /* 총 건수 */
   &__total{
     margin: 3.125rem 0 1.25rem 0;
     font-size: $font-desc;
@@ -56,7 +53,6 @@
       color: $primary;
     }
   }
-  /* 공지사항 리스트 */
   &__list{
     display: flex;
     flex-direction: column;
@@ -112,8 +108,6 @@
   &__date{
     width: 140px;
   }
-
-  /* 페이징 */
   &__pagination{
     margin-top: 4.375rem;
     display: flex;
@@ -178,7 +172,6 @@
       background: #f5f5f5;
     }
   }
-  //게시글 없을때
   &__empty{
    padding: 1.875rem;
    text-align: center;
@@ -233,6 +226,21 @@
     font-size: 1rem;
   }
 
+  &__content-image{
+    margin: 1.5rem 0;
+    img{
+      max-width: 100%;
+      height: auto;
+      border-radius: .375rem;
+    }
+  }
+  &__content-caption{
+    margin-top: .5rem;
+    font-size: .875rem;
+    color: #777;
+    text-align: center;
+  }
+
   &__attach{
     background: #f8f8f8;
     border-radius: .625rem;
@@ -266,7 +274,6 @@
       flex: 1 1;
       overflow: hidden;
 
-      /* 다음글 아이템은 텍스트 우측 정렬 */
       &--next{
         .notice-view__nav-link{
           flex-direction: row-reverse;
@@ -287,7 +294,6 @@
       }
     }
 
-    /* nav-link가 아이콘 포함 전체 클릭 영역 */
     &-link{
       display: flex;
       align-items: center;
@@ -302,9 +308,16 @@
           text-decoration: underline;
         }
       }
+
+      &--skeleton{
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        padding: 1.625rem 1.875rem;
+        pointer-events: none;
+      }
     }
 
-    /* 아이콘 동그라미 */
     &-ico{
       display: flex;
       align-items: center;
@@ -319,15 +332,28 @@
         width: 1.25rem;
         height: 1.25rem;
       }
+
+      &--skeleton{
+        width: 3.75rem;
+        height: 3.75rem;
+        border-radius: 100px;
+        flex-shrink: 0;
+      }
     }
 
-    /* 텍스트 묶음 */
     &-text{
       display: flex;
       flex-direction: column;
       gap: .8125rem;
       overflow: hidden;
       flex: 1 1;
+
+      &--skeleton{
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+        flex: 1 1;
+      }
     }
 
     &-label{
@@ -366,16 +392,24 @@
       color: #fff;
       transition: all 0.2s;
       cursor: pointer;
-
     }
   }
 }
 
+
+/*------------- 스켈레톤 -------------*/
 .skeleton-box {
   display: inline-block;
   height: 14px;
-  background: #eee;
   border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    #eee 25%,
+    #f5f5f5 37%,
+    #eee 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.4s infinite;
 }
 
 .notice__item.skeleton {
@@ -385,18 +419,6 @@
   .notice__title { width: 60%; }
   .notice__author { width: 80px; }
   .notice__date { width: 100px; }
-}
-
-/* shimmer  */
-.skeleton-box {
-  background: linear-gradient(
-    90deg,
-    #eee 25%,
-    #f5f5f5 37%,
-    #eee 63%
-  );
-  background-size: 400% 100%;
-  animation: shimmer 1.4s infinite;
 }
 
 @keyframes shimmer {

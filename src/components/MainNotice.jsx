@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { PortableText } from "@portabletext/react";
 import { client } from "../api/sanity";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
@@ -99,7 +100,11 @@ function MainNotice() {
                 <h3 className="notice-card__title">{item.title}</h3>
 
                 <p className="notice-card__desc">
-                  {item.content || "내용 준비중입니다."}
+                  {item.content ? (
+                    <PortableText value={item.content} />
+                  ) : (
+                    "내용 준비중입니다."
+                  )}
                 </p>
 
                 <time className="notice-card__date">
