@@ -1,6 +1,7 @@
 import { Outlet, useLocation, Link } from "react-router-dom";
 import { HouseIcon } from "@phosphor-icons/react";
 import { Helmet } from "react-helmet-async";
+import FixedContact from "../components/FixedContact";
 import Footer from "./Footer";
 
 const MENU_DATA = {
@@ -103,9 +104,7 @@ function SubLayout() {
           <section className={`sub-hero sub-hero--${depth1}`}>
             <div className="sub-hero__inner inner">
               <div className="sub-hero__content">
-                <h2 className="sub-hero__title">
-                  {currentCategory.title}
-                </h2>
+                <h2 className="sub-hero__title">{currentCategory.title}</h2>
                 <p
                   className="sub-hero__desc"
                   style={{ whiteSpace: "pre-line" }}
@@ -157,6 +156,7 @@ function SubLayout() {
           </main>
         </div>
       </div>
+      <FixedContact />
       <Footer />
     </>
   );

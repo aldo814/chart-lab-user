@@ -15,6 +15,12 @@ function MainNotice() {
   const [total, setTotal] = useState(0);
   const swiperRef = useRef(null);
 
+  const ptComponents = {
+    types: {
+      image: () => null,
+    },
+  };
+
   useEffect(() => {
     const fetchNotices = async () => {
       const pinned = await client.fetch(`
@@ -99,13 +105,16 @@ function MainNotice() {
 
                 <h3 className="notice-card__title">{item.title}</h3>
 
-                <p className="notice-card__desc">
+                <div className="notice-card__desc">
                   {item.content ? (
-                    <PortableText value={item.content} />
+                    <PortableText
+                      value={item.content}
+                      components={ptComponents}
+                    />
                   ) : (
                     "내용 준비중입니다."
                   )}
-                </p>
+                </div>
 
                 <time className="notice-card__date">
                   {item.createdAt?.slice(0, 10)}

@@ -1,0 +1,38 @@
+.fixed-contact{
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.71);
+  backdrop-filter: blur(15px) saturate(150%);-webkit-backdrop-filter: blur(15px) saturate(150%);
+  z-index: 99;
+  padding: .75rem 1.875rem;
+  &__link{
+    display: flex;
+    gap: .8125rem;
+    align-items: center;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    &:hover{
+      letter-spacing: .125rem;
+      .fixed-contact__icon-box{transform: scale(1.2) rotate(360deg);}
+    }
+  }
+
+  &__icon-box{
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    img{
+      width: 20px;
+      transition: all 0.5s
+    }
+  }
+  &__text{
+    color: #fff;
+    font-size: .9375rem;
+  }
+}
